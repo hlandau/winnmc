@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:SystemTools="http://schemas.appsecinc.com/wix/SystemToolsExtension" xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension" xmlns:Firewall="http://schemas.microsoft.com/wix/FirewallExtension">
+  <Product
+    Name="WinNMC"
+    Id="bfec1920-3740-4ea0-a7c1-f7d423ec8888"
+    UpgradeCode="3735f99c-37bd-4310-92ee-db91f0b7bbc1"
+    Language="1033" Version="1.0.0"
+    Manufacturer="Namecoin"
+    >
+
+    <Package InstallerVersion="150" Compressed="yes"
+      Description="WinNMC"
+      Comments="WinNMC"
+      Manufacturer="Namecoin"
+      Id="c6b518ed-41b9-4fca-93d1-eb6fc36c6850"
+      />
+    <Media Id="1" Cabinet="Media1.cab" EmbedCab="yes" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A later version of [ProductName] is already installed." />
+
+    <!-- no system restore -->
+    <!--Property Id="MSIFASTINSTALL" Value="1" /-->
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+    <Property Id="ARPURLINFOABOUT" Value="http://www.namecoin.org/" />
+    <Property Id="ARPCONTACT" Value="http://www.namecoin.org/" />
+    <Property Id="ARPCOMMENTS" Value="Namecoin Project" />
+    <Property Id="ALLUSERS" Value="1" />
+
+    <Condition Message="This application is only supported on Windows Vista or later.">
+      <![CDATA[Installed or (VersionNT >= 600)]]>
+    </Condition>
+
+    <UIRef Id="WixUI_FeatureTree" />
+    <Property Id="ApplicationFolderName" Value="WinNMC" />
+    <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+    <WixVariable Id="WixUISupportPerUser" Value="0" />
+
+    <Property Id="NAMECOINDATADIRECTORY">
+      <RegistrySearch Id="NamecoinDataDirectoryRegSearch" Key="Software\WinNMC\namecoind" Name="DataLocation" Root="HKLM" Type="raw" />
+    </Property>
+
+    <Property Id="GENERATE_RANDOM_LENGTH" Value="64" />
+    <Binary Id="CryptoBinary" SourceFile="Cryptography.dll" />
+    <CustomAction Id="CryptoRandomString"
+      BinaryKey="CryptoBinary"
+      DllEntry="GenerateRandomString"
+      Execute="immediate" Return="check" Impersonate="yes" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Component Id="RegKeys">
+        <RegistryKey Id="RegKey" Key="Software\WinNMC" Root="HKLM" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+          <RegistryValue Id="WinNmcInstallLocationRegKey" Name="InstallLocation" Type="string" Value="[INSTALLDIR]" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="NamecoindRegKeys">
+        <RegistryKey Id="NamecoindRegKey" Key="Software\WinNMC\namecoind" Root="HKLM" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+          <RegistryValue Id="NamecoindDataDirRegKey" Name="DataLocation" Type="string" Value="[NAMECOINDATADIRECTORY]" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <!--Component Id="NcdnsUser" Guid="1791dafd-0d21-4070-b0ec-ff342d53bbe7">
+        <Util:User Id="NcdnsUserAccount"
+          Name="ncdns"
+          RemoveOnUninstall="yes"
+          LogonAsService="yes"
+          Disabled="no"
+          PasswordNeverExpires="yes"
+          PasswordExpired="no"
+          Password="[GENERATE_RANDOM_RESULT]"
+          >
+          <Util:GroupRef Id="UserGroup" />
+        </Util:User>
+      </Component>
+
+    <Util:Group Id="UserGroup" Name="Users" />
+
+      <Component Id="NcdnsRegKeys">
+        <RegistryKey Id="NcdnsRegKey" Key="Software\WinNMC\ncdns" Root="HKLM" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+          <RegistryKey Id="NcdnsPrivateRegKey" Key="Private" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+            <Permission User="ncdns" Read="yes" ReadPermission="yes" EnumerateSubkeys="yes" />
+            <Permission User="ncdns" Read="yes" ReadPermission="yes" EnumerateSubkeys="yes" />
+            <RegistryValue Id="NcdnsPrivatePasswordRegKey" Name="UserPassword" Type="string" Value="[GENERATE_RANDOM_RESULT]" KeyPath="yes" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+
+      <Component Id="NamecoindUser" Guid="ac547988-3428-4fab-b2da-ffd96094c3f1">
+        <Util:User Id="NamecoinUserAccount"
+          Name="namecoind"
+          RemoveOnUninstall="yes"
+          LogonAsService="yes"
+          Disabled="no"
+          PasswordNeverExpires="yes"
+          PasswordExpired="no"
+          Password="[GENERATE_RANDOM_RESULT]"
+          >
+          <Util:GroupRef Id="UserGroup" />
+        </Util:User>
+      </Component>
+
+      <Component Id="NamecoindRegKeys">
+        <RegistryKey Id="NamecoindRegKey" Key="Software\WinNMC\namecoind" Root="HKLM" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+          <RegistryKey Id="NamecoindPrivateRegKey" Key="Private" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+            <Permission User="namecoind" Read="yes" ReadPermission="yes" EnumerateSubkeys="yes" />
+            <Permission User="ncdns" Read="yes" ReadPermission="yes" EnumerateSubkeys="yes" />
+            <RegistryValue Id="NamecoindPrivatePasswordRegKey" Name="UserPassword" Type="string" Value="[GENERATE_RANDOM_RESULT]" KeyPath="yes" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+
+      <Component Id="UnboundUser" Guid="ddb8507d-c4fc-4da4-a122-4574a36e81a7">
+        <Util:User Id="UnboundUserAccount"
+          Name="unbound"
+          RemoveOnUninstall="yes"
+          LogonAsService="yes"
+          Disabled="no"
+          PasswordNeverExpires="yes"
+          PasswordExpired="no"
+          Password="[GENERATE_RANDOM_RESULT]"
+          >
+          <Util:GroupRef Id="UserGroup" />
+        </Util:User>
+      </Component>
+
+      <Component Id="UnboundRegKeys">
+        <RegistryKey Id="UnboundRegKey" Key="Software\WinNMC\Unbound" Root="HKLM" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+          <RegistryKey Id="UnboundPrivateRegKey" Key="Private" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+            <Permission User="unbound" Read="yes" ReadPermission="yes" EnumerateSubkeys="yes" />
+            <Permission User="ncdns" Read="yes" ReadPermission="yes" EnumerateSubkeys="yes" //>
+            <RegistryValue Id="UnboundPrivatePasswordRegKey" Name="UserPassword" Type="string" Value="[GENERATE_RANDOM_RESULT]" KeyPath="yes" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component-->
+
+      <Component Id="NamecoindFwex" Guid="1dad2db3-3763-4a7d-8551-82c6bde9daab">
+        <Firewall:FirewallException Id="NamecoindFwexEx"
+          Description="namecoind"
+          Name="namecoind" Port="8334" Profile="all" Protocol="tcp" Scope="any"
+          IgnoreFailure="yes" />
+      </Component>
+
+      <Directory Id="CommonAppDataFolder" Name="ProgramData">
+        <Directory Id="NAMECOINDATADIRECTORY" Name="Namecoin">
+          <Component Id="NamecoindDataDirectory" Guid="fc482ab8-3be6-459d-a4cc-21b94d2d4b7b">
+            <CreateFolder />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramFilesFolder" Name="Program Files">
+        <Directory Id="INSTALLDIR" Name="WinNMC">
+          <Component Id="ProgDirUninstallLink" Guid="f87702bc-1964-4f27-9cac-300d0cd4ab6c">
+            <CreateFolder />
+            <RemoveFolder Id="RemoveProgDir" On="uninstall" />
+            <Shortcut Id="ProgDirUninstallShortcut" Name="Uninstall"
+              Target="[SystemFolder]msiexec.exe"
+              Arguments="/x [ProductCode]"
+              Description="Uninstalls WinNMC"
+              />
+          </Component>
+
+          <Directory Id="UnboundDir" Name="Unbound">
+            <Component Id="UnboundExe">
+              <File Id="UnboundExeFile" Name="unbound.exe" Source="../unbound/unbound.exe" KeyPath="yes" Checksum="yes" />
+              <ServiceInstall Id="UnboundExeSvcInstall"
+                DisplayName="Unbound DNS Resolver"
+                Name="Unbound"
+                Description="Unbound DNS Resolver (WinNMC)"
+                Type="ownProcess"
+                Start="auto"
+                Interactive="no"
+                Arguments="-c &quot;[#UnboundConfFile]&quot; -w service"
+                ErrorControl="normal" />
+              <ServiceControl Id="UnboundExeSvcControl" Start="install" Stop="both" Remove="uninstall" Name="Unbound" />
+            </Component>
+            <Component Id="UnboundControlExe">
+              <File Id="UnboundControlExeFile" Name="unbound-control.exe" Source="../unbound/unbound-control.exe" KeyPath="yes" Checksum="yes" />
+            </Component>
+
+            <Component Id="UnboundBitZoneConf">
+              <File Id="UnboundBitZoneConfFile" Name="bitzone.conf" Source="bitzone.conf" KeyPath="yes" />
+            </Component>
+            <Component Id="UnboundForwardConf">
+              <File Id="UnboundForwardConfFile" Name="forwardzone.conf" Source="forwardzone.conf" KeyPath="yes" />
+            </Component>
+            <Component Id="UnboundRemoteConf">
+              <File Id="UnboundRemoteConfFile" Name="remote.conf" Source="remote.conf" KeyPath="yes" />
+            </Component>
+            <Component Id="UnboundLocalConf">
+              <File Id="UnboundLocalConfFile" Name="local.conf" Source="local.conf" KeyPath="yes" />
+            </Component>
+
+            <Component Id="UnboundConf">
+              <File Id="UnboundConfFile" Name="service.conf" Source="unbound.conf" KeyPath="yes" />
+              <SystemTools:TemplateFile Id="UnboundConfTpl" Source="[#UnboundConfFile]" Target="[#UnboundConfFile]" ExecuteOnInstall="yes">
+                <SystemTools:TemplateFileProperty Id="UnboundRootHintsPath" Name="UnboundRootHintsPath" Value="[#UnboundRootHintsFile]" />
+                <SystemTools:TemplateFileProperty Id="UnboundRootKeyPath" Name="UnboundRootKeyPath" Value="[#UnboundDnssecRootAnchorKeyFile]" />
+                <SystemTools:TemplateFileProperty Id="UnboundDlvKeyPath" Name="UnboundDlvKeyPath" Value="[#UnboundDlvKeyFile]" />
+                <SystemTools:TemplateFileProperty Id="UnboundPath" Name="UnboundPath" Value="[UnboundDir]" />
+              </SystemTools:TemplateFile>
+            </Component>
+            <Component Id="UnboundRootHints">
+              <File Id="UnboundRootHintsFile" Name="root.hints" Source="../unbound/root.hints" KeyPath="yes" />
+            </Component>
+            <Directory Id="UnboundKeysDir" Name="keys">
+              <Component Id="UnboundDlvKey">
+                <File Id="UnboundDlvKeyFile" Name="dlv.isc.org.key" Source="../unbound/keys/dlv.isc.org.key" KeyPath="yes" />
+              </Component>
+              <Component Id="UnboundDnssecRootAnchorKey">
+                <File Id="UnboundDnssecRootAnchorKeyFile" Name="dnssec-root-anchor.key" Source="../unbound/keys/dnssec-root-anchor.key" KeyPath="yes" />
+              </Component>
+            </Directory>
+
+            <Directory Id="OpensslDir" Name="openssl">
+              <Component Id="OpensslExe">
+                <File Id="OpensslExeFile" Name="openssl.exe" Source="../openssl/openssl.exe" KeyPath="yes" Checksum="yes" />
+              </Component>
+              <Component Id="Libeay32Dll">
+                <File Id="Libeay32DllFile" Name="libeay32.dll" Source="../openssl/libeay32.dll" KeyPath="yes" Checksum="yes" />
+              </Component>
+              <Component Id="Ssleay32Dll">
+                <File Id="Ssleay32DllFile" Name="ssleay32.dll" Source="../openssl/ssleay32.dll" KeyPath="yes" Checksum="yes" />
+              </Component>
+            </Directory>
+          </Directory>
+
+          <Directory Id="NamecoindDir" Name="namecoind">
+            <Component Id="NamecoindExe">
+              <File Id="NamecoindExeFile" Name="namecoind.exe" Source="../namecoind/namecoind.exe" KeyPath="yes" Checksum="yes" />
+            </Component>
+            <Component Id="NamecoinCliExe">
+              <File Id="NamecoinCliExeFile" Name="namecoin-cli.exe" Source="../namecoind/namecoin-cli.exe" KeyPath="yes" Checksum="yes" />
+            </Component>
+            <Component Id="NamecoindConf">
+              <File Id="NamecoindConfFile" Name="namecoin.conf" Source="namecoin.conf" KeyPath="yes" />
+              <SystemTools:TemplateFile Id="NamecoindConfTpl" Source="[#NamecoindConfFile]" Target="[#NamecoindConfFile]" ExecuteOnInstall="yes">
+                <SystemTools:TemplateFileProperty Id="NamecoindPassword" Name="PASSWORD" Value="[GENERATE_RANDOM_RESULT]" />
+                <SystemTools:TemplateFileProperty Id="NamecoindDataPath" Name="DATADIR" Value="[NAMECOINDATADIRECTORY]" />
+              </SystemTools:TemplateFile>
+            </Component>
+            <!--Component Id="NamecoindLibgccDll">
+              <File Id="NamecoindLibgccDllFile" Name="libgcc_s_dw2-1.dll" Source="../namecoind/libgcc_s_dw2-1.dll" KeyPath="yes" Checksum="yes" />
+            </Component>
+            <Component Id="NamecoindLibstdcxxDll">
+              <File Id="NamecoindLibstdcxxDllFile" Name="libstdc++-6.dll" Source="../namecoind/libstdc++-6.dll" KeyPath="yes" Checksum="yes" />
+            </Component>
+            <Component Id="NamecoindLibwinpthreadDll">
+              <File Id="NamecoindLibwinpthreadDllFile" Name="libwinpthread-1.dll" Source="../namecoind/libwinpthread-1.dll" KeyPath="yes" Checksum="yes" />
+            </Component-->
+
+            <Directory Id="NssmDir" Name="nssm">
+              <Component Id="NssmRegKeys">
+                <RegistryKey Id="NssmRegKey" Key="System\CurrentControlSet\Services\namecoind\Parameters" Root="HKLM" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+                  <RegistryValue Id="NssmAppDirectoryRegValue" Name="AppDirectory" Type="expandable" Value="[NamecoindDir]" KeyPath="yes" />
+                  <RegistryValue Id="NssmApplicationRegValue" Name="Application" Type="expandable" Value="[#NamecoindExeFile]" />
+                  <RegistryValue Id="NssmAppParametersRegValue" Name="AppParameters" Type="expandable" Value="&quot;-conf=[#NamecoindConfFile]&quot;" />
+                  <RegistryKey Id="NssmAppExitRegKey" Key="AppExit" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+                    <RegistryValue Id="NssmAppExitRegValue" Type="string" Value="Restart" />
+                  </RegistryKey>
+                </RegistryKey>
+              </Component>
+
+              <Component Id="NssmExe">
+                <ServiceInstall Id="NssmExeSvcInstall"
+                  DisplayName="namecoind"
+                  Name="namecoind"
+                  Description="Namecoin (WinNMC)"
+                  Type="ownProcess"
+                  Start="auto"
+                  Interactive="no"
+                  ErrorControl="normal"
+                  />
+                <ServiceControl Id="NssmExeSvcControl" Start="install" Stop="both" Remove="uninstall" Name="namecoind" />
+                <File Id="NssmExeFile" Name="nssm.exe" Source="nssm.exe" KeyPath="yes" Checksum="yes" />
+              </Component>
+            </Directory>
+
+            <!--Directory Id="SrvstartDir" Name="srvstart">
+              <Component Id="SrvstartDll">
+                <File Id="SrvstartDllFile" Name="srvstart.dll" Source="srvstart.dll" KeyPath="yes" Checksum="yes" />
+              </Component>
+              <Component Id="SrvstartExe">
+                <ServiceInstall Id="SrvstartExeSvcInstall"
+                  DisplayName="namecoind"
+                  Name="namecoind"
+                  Description="Namecoin node (WinNMC)"
+                  Type="ownProcess"
+                  Start="auto"
+                  Interactive="no"
+                  Arguments="svc namecoind &quot;[#NamecoindExeFile]&quot; &quot;-conf=[#NamecoindConfFile]&quot;"
+                  ErrorControl="normal" />
+                <ServiceControl Id="SrvstartExeSvcControl" Start="install" Stop="both" Remove="uninstall" Name="namecoind" />
+                <File Id="SrvstartExeFile" Name="srvstart.exe" Source="srvstart.exe" KeyPath="yes" Checksum="yes" />
+              </Component>
+              <Component Id="LoggerDll">
+                <File Id="LoggerDllFile" Name="logger.dll" Source="logger.dll" KeyPath="yes" Checksum="yes" />
+              </Component>
+            </Directory-->
+          </Directory>
+
+          <Directory Id="NcdnsDir" Name="ncdns">
+            <Component Id="NcdnsExe">
+              <File Id="NcdnsExeFile" Name="ncdns.exe" Source="../ncdns/ncdns.exe" KeyPath="yes" Checksum="yes" />
+              <ServiceInstall Id="NcdnsExeSvcInstall"
+                DisplayName="ncdns"
+                Name="ncdns"
+                Description="ncdns (WinNMC)"
+                Type="ownProcess"
+                Start="auto"
+                Interactive="no"
+                Arguments="&quot;-config=[#NcdnsConfFile]&quot;"
+                ErrorControl="normal"
+                />
+              <ServiceControl Id="NcdnsExeSvcControl" Start="install" Stop="both" Remove="uninstall" Name="ncdns" />
+            </Component>
+            <Component Id="NcdnsConf">
+              <File Id="NcdnsConfFile" Name="ncdns.conf" Source="ncdns.conf" KeyPath="yes" />
+              <SystemTools:TemplateFile Id="NcdnsConfTpl" Source="[#NcdnsConfFile]" Target="[#NcdnsConfFile]" ExecuteOnInstall="yes">
+                <SystemTools:TemplateFileProperty Id="NcdnsRpcPassword" Name="RPCPASSWORD" Value="[GENERATE_RANDOM_RESULT]" />
+              </SystemTools:TemplateFile>
+            </Component>
+          </Directory>
+
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id="Main" Title="WinNMC" AllowAdvertise="no" Absent="disallow" ConfigurableDirectory="INSTALLDIR">
+      <Feature Id="Namecoind" Title="namecoind" AllowAdvertise="no" Absent="disallow">
+        <ComponentRef Id="NamecoindDataDirectory" />
+        <ComponentRef Id="NamecoindExe" />
+        <ComponentRef Id="NamecoinCliExe" />
+        <ComponentRef Id="NamecoindConf" />
+        <!--ComponentRef Id="NamecoindLibgccDll" />
+        <ComponentRef Id="NamecoindLibstdcxxDll" />
+        <ComponentRef Id="NamecoindLibwinpthreadDll" -->
+        <ComponentRef Id="NssmExe" />
+        <ComponentRef Id="NssmRegKeys" />
+        <!--ComponentRef Id="SrvstartDll" />
+        <ComponentRef Id="LoggerDll" />
+        <ComponentRef Id="SrvstartExe" /-->
+        <ComponentRef Id="NamecoindFwex" />
+        <Feature Id="NamecoindDataDirectoryLocation" Title="Data Directory Location" AllowAdvertise="no" Absent="disallow" ConfigurableDirectory="NAMECOINDATADIRECTORY">
+          <ComponentRef Id="NamecoindRegKeys" />
+        </Feature>
+      </Feature>
+      <Feature Id="Unbound" Title="Unbound" AllowAdvertise="no" Absent="disallow">
+        <ComponentRef Id="UnboundExe" />
+        <ComponentRef Id="UnboundControlExe" />
+        <ComponentRef Id="UnboundConf" />
+        <ComponentRef Id="UnboundBitZoneConf" />
+        <ComponentRef Id="UnboundForwardConf" />
+        <ComponentRef Id="UnboundRemoteConf" />
+        <ComponentRef Id="UnboundLocalConf" />
+        <ComponentRef Id="UnboundRootHints" />
+        <ComponentRef Id="UnboundDlvKey" />
+        <ComponentRef Id="UnboundDnssecRootAnchorKey" />
+        <ComponentRef Id="OpensslExe" />
+        <ComponentRef Id="Libeay32Dll" />
+        <ComponentRef Id="Ssleay32Dll" />
+      </Feature>
+      <Feature Id="Ncdns" Title="ncdns" AllowAdvertise="no" Absent="disallow">
+        <ComponentRef Id="NcdnsExe" />
+        <ComponentRef Id="NcdnsConf" />
+      </Feature>
+      <ComponentRef Id="RegKeys" />
+      <ComponentRef Id="ProgDirUninstallLink" />
+    </Feature>
+
+    <InstallExecuteSequence>
+      <Custom Action="CryptoRandomString" Before="CreateFolders" />
+    </InstallExecuteSequence>
+  </Product>
+</Wix>

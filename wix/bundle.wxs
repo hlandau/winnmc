@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+  <Bundle UpgradeCode="5f1b6936-b35c-42ed-ab10-93dccbca0cfc" Version="1.0.0">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense">
+      <bal:WixStandardBootstrapperApplication LicenseFile="license.rtf" ShowVersion="yes" />
+    </BootstrapperApplicationRef>
+    <Chain>
+      <MsiPackage Id="WinNmcMsi" DisplayInternalUI="yes" Compressed="yes" SourceFile="winnmc.msi" />
+    </Chain>
+  </Bundle>
+</Wix>

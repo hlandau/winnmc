@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <UI Id="WinNMCUI">
+       <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+       <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+       <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+
+       <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+
+       <!-- DH_WelcomeDlg -->
+       <Dialog Id="DH_WelcomeDlg" Width="370" Height="270" Title="!(loc.WelcomeDlg_Title)">
+         <Control Id="Install" Type="PushButton" ElevationShield="yes" X="304" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WelcomeEulaDlgInstall)" Hidden="yes">
+           <Publish Event="SpawnWaitDialog" Value="DH_WaitForCostingDlg">CostingComplete = 1</Publish>
+           <Publish Property="WixUI_InstallMode" Value="Update">Installed AND PATCH</Publish>
+           <Publish Event="EndDialog" Value="Return"><![CDATA[OutOfDiskSpace <> 1]]></Publish>
+           <Condition Action="show">ALLUSERS</Condition>
+         </Control>
+         <Control Id="InstallNoShield" Type="PushButton" ElevationShield="no" X="304" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WelcomeEulaDlgInstall)" Hidden="yes">
+           <Publish Event="SpawnWaitDialog" Value="DH_WaitForCostingDlg">CostingComplete = 1</Publish>
+           <Publish Property="WixUI_InstallMode" Value="Update">Installed AND PATCH</Publish>
+           <Publish Event="EndDialog" Value="Return"><![CDATA[OutOfDiskSpace <> 1]]></Publish>
+           <Condition Action="show">NOT ALLUSERS</Condition>           
+         </Control> 
+         <Control Id="Cancel" Type="PushButton" X="20" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+           <Publish Event="EndDialog" Value="Exit">1</Publish>
+         </Control>
+         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+         <Control Id="Description" Type="Text" X="135" Y="80" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeDlgDescription)" >
+           <Condition Action="show">NOT Installed OR NOT PATCH</Condition>
+           <Condition Action="hide">Installed AND PATCH</Condition>
+         </Control>
+         <Control Id="PatchDescription" Type="Text" X="135" Y="80" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeUpdateDlgDescriptionUpdate)" >
+           <Condition Action="show">Installed AND PATCH</Condition>
+           <Condition Action="hide">NOT Installed OR NOT PATCH</Condition>
+         </Control>
+         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.WelcomeDlgTitle)" />
+       </Dialog>
+       
+       <!-- DH_ProgressDlg -->
+       <Dialog Id="DH_ProgressDlg" Width="370" Height="270" Title="Installing" Modeless="yes">
+         <Control Id="Cancel" Type="PushButton" X="20" Y="243" Width="56" Height="17" Default="yes" Cancel="yes"
+                  Text="!(loc.WixUICancel)">
+           <Publish Event="EndDialog" Value="Exit">1</Publish>
+         </Control>
+         <Control Id="DH_BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+         <Control Id="DH_TextInstalling" Type="Text" X="20" Y="65" Width="330" Height="35" Hidden="yes" NoPrefix="yes" Text="!(loc.ProgressDlgTextInstalling)">
+           <Condition Action="show">NOT Installed OR (Installed AND (RESUME OR Preselected) AND NOT PATCH)</Condition>
+         </Control>
+         <Control Id="DH_TitleInstalling" Type="Text" X="20" Y="15" Width="330" Height="15" Transparent="yes" NoPrefix="yes" Hidden="yes" Text="!(loc.ProgressDlgTitleInstalling)">
+           <Condition Action="show">NOT Installed OR (Installed AND (RESUME OR Preselected) AND NOT PATCH)</Condition>
+         </Control>
+         <Control Id="DH_TextChanging" Type="Text" X="20" Y="65" Width="330" Height="35" Hidden="yes" NoPrefix="yes" Text="!(loc.ProgressDlgTextChanging)">
+           <Condition Action="show">WixUI_InstallMode = "Change"</Condition>
+         </Control>
+         <Control Id="DH_TitleChanging" Type="Text" X="20" Y="15" Width="330" Height="15" Transparent="yes" NoPrefix="yes" Hidden="yes" Text="!(loc.ProgressDlgTitleChanging)">
+           <Condition Action="show">WixUI_InstallMode = "Change"</Condition>
+         </Control>
+         <Control Id="DH_TextRepairing" Type="Text" X="20" Y="65" Width="330" Height="35" Hidden="yes" NoPrefix="yes" Text="!(loc.ProgressDlgTextRepairing)">
+           <Condition Action="show">WixUI_InstallMode = "Repair"</Condition>
+         </Control>
+         <Control Id="DH_TitleRepairing" Type="Text" X="20" Y="15" Width="330" Height="15" Transparent="yes" NoPrefix="yes" Hidden="yes" Text="!(loc.ProgressDlgTitleRepairing)">
+           <Condition Action="show">WixUI_InstallMode = "Repair"</Condition>
+         </Control>
+         <Control Id="DH_TextRemoving" Type="Text" X="20" Y="65" Width="330" Height="35" Hidden="yes" NoPrefix="yes" Text="!(loc.ProgressDlgTextRemoving)">
+           <Condition Action="show">WixUI_InstallMode = "Remove"</Condition>
+         </Control>
+         <Control Id="DH_TitleRemoving" Type="Text" X="20" Y="15" Width="330" Height="15" Transparent="yes" NoPrefix="yes" Hidden="yes" Text="!(loc.ProgressDlgTitleRemoving)">
+           <Condition Action="show">WixUI_InstallMode = "Remove"</Condition>
+         </Control>
+         <Control Id="DH_TextUpdating" Type="Text" X="20" Y="65" Width="330" Height="35" Hidden="yes" NoPrefix="yes" Text="!(loc.ProgressDlgTextUpdating)">
+           <Condition Action="show">WixUI_InstallMode = "Update"</Condition>
+         </Control>
+         <Control Id="DH_TitleUpdating" Type="Text" X="20" Y="15" Width="330" Height="15" Transparent="yes" NoPrefix="yes" Hidden="yes" Text="!(loc.ProgressDlgTitleUpdating)">
+           <Condition Action="show">WixUI_InstallMode = "Update"</Condition>
+         </Control>
+         <Control Id="DH_ActionText" Type="Text" X="20" Y="100" Width="285" Height="10">
+           <Subscribe Event="ActionText" Attribute="Text" />
+         </Control>
+         <Control Id="DH_ProgressBar" Type="ProgressBar" X="20" Y="115" Width="330" Height="10" ProgressBlocks="yes"
+                  Text="!(loc.ProgressDlgProgressBar)">
+           <Subscribe Event="SetProgress" Attribute="Progress" />
+         </Control>
+       </Dialog>
+       
+       <Dialog Id="DH_FatalError" Width="370" Height="270" Title="!(loc.FatalError_Title)">
+         <Control Id="Finish" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUIFinish)">
+           <Publish Event="EndDialog" Value="Exit">1</Publish>
+         </Control>
+         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Disabled="yes" Text="!(loc.WixUICancel)" />
+         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.FatalErrorTitle)" />
+         <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Text="!(loc.FatalErrorDescription1) !(loc.FatalErrorDescription2)" />
+       </Dialog>
+
+       <Dialog Id="DH_ErrorDlg" Width="270" Height="105" Title="!(loc.ErrorDlg_Title)" ErrorDialog="yes">
+         <Control Id="ErrorText" Type="Text" X="48" Y="15" Width="205" Height="60" TabSkip="no" NoPrefix="yes" Text="!(loc.ErrorDlgErrorText)" />
+         <Control Id="Y" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUIYes)">
+           <Publish Event="EndDialog" Value="ErrorYes">1</Publish>
+         </Control>
+         <Control Id="A" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUICancel)">
+           <Publish Event="EndDialog" Value="ErrorAbort">1</Publish>
+         </Control>
+         <Control Id="C" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUICancel)">
+           <Publish Event="EndDialog" Value="ErrorCancel">1</Publish>
+         </Control>
+         <Control Id="I" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUIIgnore)">
+           <Publish Event="EndDialog" Value="ErrorIgnore">1</Publish>
+         </Control>
+         <Control Id="N" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUINo)">
+           <Publish Event="EndDialog" Value="ErrorNo">1</Publish>
+         </Control>
+         <Control Id="O" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUIOK)">
+           <Publish Event="EndDialog" Value="ErrorOk">1</Publish>
+         </Control>
+         <Control Id="R" Type="PushButton" X="100" Y="80" Width="56" Height="17" TabSkip="yes" Text="!(loc.WixUIRetry)">
+           <Publish Event="EndDialog" Value="ErrorRetry">1</Publish>
+         </Control>
+       </Dialog>
+       <Property Id="ErrorDialog" Value="DH_ErrorDlg" />
+
+       <Dialog Id="FilesInUse" Width="370" Height="270" Title="!(loc.FilesInUse_Title)" KeepModeless="yes">
+         <Control Id="Retry" Type="PushButton" X="304" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUIRetry)">
+           <Publish Event="EndDialog" Value="Retry">1</Publish>
+         </Control>
+         <Control Id="Ignore" Type="PushButton" X="235" Y="243" Width="56" Height="17" Text="!(loc.WixUIIgnore)">
+           <Publish Event="EndDialog" Value="Ignore">1</Publish>
+         </Control>
+         <Control Id="Exit" Type="PushButton" X="166" Y="243" Width="56" Height="17" Text="!(loc.FilesInUseExit)">
+           <Publish Event="EndDialog" Value="Exit">1</Publish>
+         </Control>
+         <Control Id="Text" Type="Text" X="20" Y="55" Width="330" Height="30" Text="!(loc.FilesInUseText)" />
+         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+         <Control Id="Description" Type="Text" X="20" Y="23" Width="280" Height="20" Transparent="yes" NoPrefix="yes" Text="!(loc.FilesInUseDescription)" />
+         <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.FilesInUseTitle)" />
+         <Control Id="List" Type="ListBox" X="20" Y="87" Width="330" Height="130" Property="FileInUseProcess" Sunken="yes" TabSkip="yes" />
+       </Dialog>
+
+       <Dialog Id="DH_ExitDialog" Width="370" Height="270" Title="!(loc.ExitDialog_Title)">
+         <Control Id="Finish" Type="PushButton" X="304" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUIFinish)" />
+         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+         <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" />
+         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
+         <Control Id="OptionalText" Type="Text" X="135" Y="110" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Hidden="yes" Text="[WIXUI_EXITDIALOGOPTIONALTEXT]">
+           <Condition Action="show">WIXUI_EXITDIALOGOPTIONALTEXT AND NOT Installed</Condition>
+         </Control>
+         <Control Id="OptionalCheckBox" Type="CheckBox" X="135" Y="190" Width="220" Height="40" Hidden="yes" Property="RUN_PROGRAM_AFTER" CheckBoxValue="1" Text="Run Occult">
+           <Condition Action="show">NOT Installed</Condition>
+         </Control>
+       </Dialog>
+
+       <Dialog Id="DH_WaitForCostingDlg" Width="260" Height="85" Title="!(loc.WaitForCostingDlg_Title)">
+         <Control Id="Return" Type="PushButton" X="102" Y="57" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WaitForCostingDlgReturn)">
+           <Publish Event="EndDialog" Value="Exit">1</Publish>
+         </Control>
+         <Control Id="Text" Type="Text" X="48" Y="15" Width="194" Height="30" Text="!(loc.WaitForCostingDlgText)" />
+       </Dialog>
+       
+       <Publish Dialog="DH_ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+
+       <!-- -->
+       <!-- -->
+       <InstallUISequence>
+         <Show Dialog="DH_WelcomeDlg" Before="DH_ProgressDlg" Overridable="yes">
+           NOT Installed OR PATCH
+         </Show>
+         <Show Dialog="DH_ProgressDlg" Before="ExecuteAction" Overridable="yes" />
+         <Show Dialog="DH_FatalError" OnExit="error" Overridable="yes" />
+         <Show Dialog="DH_ExitDialog" OnExit="success" Overridable="yes" />
+         <LaunchConditions After="AppSearch" />
+       </InstallUISequence>
+
+       <AdminUISequence>
+         <Show Dialog="DH_FatalError" OnExit="error" Overridable="yes" />
+         <Show Dialog="DH_ExitDialog" OnExit="success" Overridable="yes" />       
+       </AdminUISequence>
+
+       <!--Publish Dialog="DH_ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">
+         RUN_PROGRAM_AFTER = 1 and NOT Installed
+       </Publish-->
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="BrowseDlg" />
+    </UI>
+    <UIRef Id="WixUI_Common" />
+  </Fragment>
+</Wix>
